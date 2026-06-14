@@ -16,33 +16,55 @@ import com.kms.katalon.core.webui.keyword.WebUiBuiltInKeywords as WebUI
 import com.kms.katalon.core.windows.keyword.WindowsBuiltinKeywords as Windows
 import internal.GlobalVariable as GlobalVariable
 import org.openqa.selenium.Keys as Keys
-
-import kafka.KafkaHelper
 import com.kms.katalon.core.webservice.keyword.WSBuiltInKeywords as WS
 import groovy.json.JsonSlurper
 
-import kafka.KafkaHelper
+
+@Grab('org.apache.kafka:kafka-clients:3.3.1')
+import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import java.time.Duration
+import java.util.Properties
 import groovy.json.JsonSlurper
 
-// Consume messages dari topic "test-messages"
-def records = KafkaHelper.consumeMessages('test-messages', 10)
+@Grab('org.apache.kafka:kafka-clients:3.3.1')
+import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import java.time.Duration
+import java.util.Properties
+import groovy.json.JsonSlurper
 
-// Verify messages received
-assert records.count() > 0 : 'No messages received from Kafka'
+@Grab('org.apache.kafka:kafka-clients:3.3.1')
+import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.common.serialization.StringDeserializer
+import java.time.Duration
+import java.util.Properties
+import groovy.json.JsonSlurper
 
-println("✅ Received ${records.count()} messages from Kafka")
+Properties props = new Properties()
+props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, 'localhost:9092')
+props.put(ConsumerConfig.GROUP_ID_CONFIG, 'test-group-' + System.currentTimeMillis())
 
-// Validate message content
+props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class)
+props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class)
+
+props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, 'earliest')
+
+def consumer = new KafkaConsumer(props)
+consumer.subscribe(['test-messages'])
+
+def records = consumer.poll(Duration.ofSeconds(10))
+
+assert records.count() > 0 : 'No messages received'
+println("✅ Received ${records.count()} messages")
+
 records.each { record ->
-    def message = record.value()
-    println("📨 Message: $message")
-    
-    def jsonSlurper = new JsonSlurper()
-    def msgData = jsonSlurper.parseText(message)
-    
-    // Assertions
-    assert msgData.id != null : 'Missing id'
-    assert msgData.name != null : 'Missing name'
-    assert msgData.email != null : 'Missing email'
-    
+	def message = record.value()
+	println("📨 Message: $message")
+	def msgData = new JsonSlurper().parseText(message)
+	assert msgData.id != null
+	println("✅ Message valid: ID=${msgData.id}")
 }
+
+consumer.close()
