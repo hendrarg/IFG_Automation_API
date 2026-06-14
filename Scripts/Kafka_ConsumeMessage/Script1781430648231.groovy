@@ -20,19 +20,6 @@ import com.kms.katalon.core.webservice.keyword.WSBuiltInKeywords as WS
 import groovy.json.JsonSlurper
 
 
-@Grab('org.apache.kafka:kafka-clients:3.3.1')
-import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import java.time.Duration
-import java.util.Properties
-import groovy.json.JsonSlurper
-
-@Grab('org.apache.kafka:kafka-clients:3.3.1')
-import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import java.time.Duration
-import java.util.Properties
-import groovy.json.JsonSlurper
 
 @Grab('org.apache.kafka:kafka-clients:3.3.1')
 import org.apache.kafka.clients.consumer.KafkaConsumer
